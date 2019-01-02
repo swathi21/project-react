@@ -4,7 +4,7 @@
  * This is the first thing users see of our App, at the '/' route
  */
 
-import React from 'react';
+import React,  { Component, Fragment } from 'react'
 import PropTypes from 'prop-types';
 import { Helmet } from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
@@ -34,7 +34,7 @@ import reducer from './reducer';
 import saga from './saga';
 import { Map, TileLayer, Marker, Popup } from 'react-leaflet';
 import  MarkerClusterGroup from 'react-leaflet-markercluster';
-
+import L from 'leaflet';
 
 /* eslint-disable react/prefer-stateless-function */
 export class HomePage extends React.PureComponent {
@@ -44,8 +44,8 @@ export class HomePage extends React.PureComponent {
   super(props);
   
   this.state = {
-        hasLocation: false,
-lat: 51.505,
+    hasLocation: false,
+    lat: 51.505,
     lng: -0.09,
     zoom: 13,
 
@@ -57,9 +57,11 @@ lat: 51.505,
    * when initial state username is not null, submit the form to load repos
    */
   componentDidMount() {
-    if (this.props.username && this.props.username.trim().length > 0) {
-      this.props.onSubmitForm();
-    }
+     this.props.onSubmitForm();
+  }
+
+onMarkerClick(evt) {
+    console.log(evt.payload);
   }
 
 
@@ -68,7 +70,7 @@ lat: 51.505,
 
 
     const { loading, error, repos } = this.props;
-
+   
 const position = [this.state.lat, this.state.lng]
 
 
@@ -78,6 +80,24 @@ const position = [this.state.lat, this.state.lng]
       repos,
     };
 
+
+
+    const myIcon = L.icon({
+                    iconUrl: require('../../../node_modules/leaflet/dist/images/marker-icon.png'),
+                    iconSize: [20,30],
+                    iconAnchor: [20,20],
+                    popupAnchor: null,
+                    shadowUrl: null,
+                    shadowSize: null,
+                    shadowAnchor: null
+                });
+
+
+var div = []
+for(var i=0;i<repos.length;i++) {
+  div.push(<Marker payload={repos[i].hostname} icon={myIcon} key={repos[i].id} position={repos[i].position} onClick={this.onClick}    />)
+}
+  
     return (
       <article>
         <Helmet>
@@ -89,22 +109,15 @@ const position = [this.state.lat, this.state.lng]
         </Helmet>
         <div  style={{padding:'10px',width:'100%',height:'500px'}}>
 
-          <Map className="markercluster-map" style={{width:'100%',height:'100%'}} center={[51.0, 19.0]} zoom={4} maxZoom={18}>    
+          <Map className="markercluster-map" style={{width:'100%',height:'100%'}} center={[36.733711, -119.800703]} zoom={4} maxZoom={18}>    
               <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <MarkerClusterGroup>
-  <Marker position={[49.8397, 24.0297]} />
-  <Marker position={[52.2297, 21.0122]} />
-  <Marker position={[51.5074, -0.0901]} />
-</MarkerClusterGroup>
+          <Fragment>{div}</Fragment>
+        </MarkerClusterGroup>
 
       </Map>
-
-
-
-
-
         </div>
       </article>
     );
@@ -123,10 +136,7 @@ HomePage.propTypes = {
 export function mapDispatchToProps(dispatch) {
   return {
     onChangeUsername: evt => dispatch(changeUsername(evt.target.value)),
-    onSubmitForm: evt => {
-      if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-      dispatch(loadRepos());
-    },
+    onSubmitForm: evt => dispatch(loadRepos()),
   };
 }
 
