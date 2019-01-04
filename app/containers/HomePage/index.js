@@ -61,7 +61,7 @@ export class HomePage extends React.PureComponent {
   }
 
 onMarkerClick(evt) {
-    console.log(evt.payload);
+    console.log(evt);
   }
 
 
@@ -95,7 +95,12 @@ const position = [this.state.lat, this.state.lng]
 
 var div = []
 for(var i=0;i<repos.length;i++) {
-  div.push(<Marker payload={repos[i].hostname} icon={myIcon} key={repos[i].id} position={repos[i].position} onClick={this.onClick}    />)
+  div.push(<Marker payload={repos[i].id} icon={myIcon} key={repos[i].id} position={repos[i].position} > 
+    <Popup><div>
+
+ <p>I am a lonely popup.</p>
+</div></Popup></Marker>
+)
 }
   
     return (
